@@ -62,8 +62,8 @@
                 <configuration>
                     <attributes>
                         <pdf-theme>font</pdf-theme>
-                        <pdf-fontsdir>fonts;${project.basedir}\src\main\resources\themes\fonts</pdf-fontsdir>
-                        <pdf-themesdir>${project.basedir}\src\main\resources\themes</pdf-themesdir>
+                        <pdf-fontsdir>fonts;${project.basedir}/src/main/resources/themes/fonts</pdf-fontsdir>
+                        <pdf-themesdir>${project.basedir}/src/main/resources/themes</pdf-themesdir>
                     </attributes>
                     <backend>pdf</backend>
                     <sourceDirectory>src/main/asciidoc-zh</sourceDirectory>
