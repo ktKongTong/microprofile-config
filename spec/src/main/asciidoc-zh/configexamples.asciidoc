@@ -30,11 +30,10 @@
 
 
 应用程序可以通过 `ConfigProvider` 以编程方式获取其配置。
-在启用 CDI 的 bean 中，它还可以通过 `@Inject Config` 注入。
+在启用 CDI 的 bean 中，它可以通过 `@Inject Config` 注入。
 应用程序可以通过此 `Config` 实例访问其配置的值。
 
 // === Simple Programmatic Example
-
 === 简单的编程示例
 
 [source, java]
@@ -42,13 +41,13 @@
 public class ConfigUsageSample {
 
     public void useTheConfig() {
-        // 获取 Config 实例 get access to the Config instance
+        // 获取 Config 实例
         Config config = ConfigProvider.getConfig();
 
         String serverUrl = config.getValue("acme.myprj.some.url", String.class);
         callToServer(serverUrl);
 
-        // 或 or
+        // 或
         ConfigValue configServerUrl = config.getConfigValue("acme.myprj.some.url");
         callToServer(configServerUrl.getValue());
     }
@@ -56,7 +55,6 @@ public class ConfigUsageSample {
 ----
 
 // If you need to access a different server then you can e.g. change the configuration via a Java `-D` system property:
-
 如果你需要访问不同的服务器，则可以通过 Java `-D` 系统属性更改配置，例如：
 
 [source, text]
@@ -66,14 +64,13 @@ $> java -Dacme.myprj.some.url=http://other.server/other/endpoint -jar some.jar
 
 // Note that this is only one example how to possibly configure your application.
 // Another example is to register <<custom_configsources, Custom ConfigSources>> to e.g. pick up values from a database table, etc.
-
-请注意，这只是配置应用程序的一种示例。
-另一个示例是注册 <<custom_configsources, 自定义配置源>>，例如从数据库中获取值。
+请注意，这只是配置应用程序的一个示例。
+另一个示例是注册<<custom_configsources, 自定义配置源>>以获取配置，例如从数据库中获取值等。
 
 // If a config value is a comma(`,`) separated string, this value can be automatically converted to a multiple element array with `\` as the escape character.
 // When specifying the property `myPets=dog,cat,dog\\,cat` in a config source, the following code snippet can be used to obtain an array.
-如果配置值是逗号（`，`）分隔的字符串，则可以使用 `\` 作为转义字符将其自动转换为具有多个元素的数组。
-在配置源中指定属性 `myPets=dog,cat,dog\\,cat` 时，可以使用以下代码片段来获取数组。
+如果配置值是逗号（`,`）分隔的字符串，会将其自动转换为具有多个元素的数组，使用 `\` 作为转义字符转移 `,`。
+当在配置源中指定属性 `myPets=dog,cat,dog\\,cat` 时，可以使用以下代码片段来获取数组。
 
 ----
  String[] myPets = config.getValue("myPets", String[].class);
@@ -82,7 +79,7 @@ $> java -Dacme.myprj.some.url=http://other.server/other/endpoint -jar some.jar
 
 
 // === Simple Dependency Injection Example
-
+//
 // MicroProfile Config also provides ways to inject configured values into your beans using the `@Inject` and the `@ConfigProperty` qualifier.
 // The `@Inject` annotation declares an injection point. When using this on a passivation capable bean, refer to https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#passivating_scope[CDI Specification^]
 // for more details on how to make the injection point to be passivation capable.
@@ -90,7 +87,7 @@ $> java -Dacme.myprj.some.url=http://other.server/other/endpoint -jar some.jar
 === 简单的依赖注入示例
 
 MicroProfile Config 还提供了使用 `@Inject` 和 `@ConfigProperty` 限定符将配置的值注入到 bean 中的方法。
-`@Inject` 注释声明注入点。当在具有激活能力的 bean 上使用此注释时，请参阅 https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#passivating_scope[CDI 规范^]
+`@Inject` 注解声明一个注入点。当在具有激活能力的 bean 上使用此注释时，请参阅 https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#passivating_scope[CDI 规范^]
 以了解如何使注入点具有激活能力的详细信息。
 
 [source, java]
@@ -101,65 +98,44 @@ public class InjectedConfigUsageSample {
     @Inject
     private Config config;
 
-    //The property myprj.some.url must exist with a non-empty value, otherwise a
-    //DeploymentException will be thrown.
     // myprj.some.url 属性必须存在且值不能为空，否则将抛出 DeploymentException。
     @Inject
     @ConfigProperty(name="myprj.some.url")
     private String someUrl;
 
-//     You can also inject a configuration using the ConfigValue metadata object. The
-//     configured value will not lead to a DeploymentException if the value is missing.
-//     A default value can also be specified like any other configuration.
-    // 你还可以使用 ConfigValue 元数据对象注入配置。如果缺少配置值，则不会导致 DeploymentException。
+    // 你还可以使用 ConfigValue 元数据对象注入配置。如果缺少配置值，不会导致 DeploymentException。
     // 可以像其他配置一样指定默认值。
     @Inject
     @ConfigProperty(name="myprj.another.url")
     private ConfigValue anotherUrl;
 
-    //The following code injects an Optional value of myprj.some.port property.
-    //Contrary to natively injecting the configured value, this will not lead to a
-    //DeploymentException if the value is missing.
     //下面的代码注入了 myprj.some.port 属性的 Optional 值。
     //与本地注入配置值相反，缺少该值不会导致 DeploymentException。
     @Inject
     @ConfigProperty(name="myprj.some.port")
     private Optional<Integer> somePort;
 
-    // You can also use the specialized Optional classes like OptionalInt,
-    // OptionalDouble, or OptionalLong to perform the injection. The configured value
-    // will not lead to a DeploymentException if the value is missing.
     // 你还可以使用专门的 Optional 类，如 OptionalInt、OptionalDouble 或 OptionalLong 来执行注入。
     // 缺少配置值不会导致 DeploymentException。
     @Inject
     @ConfigProperty(name="myprj.some.port")
     private OptionalInt somePort;
 
-    //Injects a Provider for the value of myprj.some.dynamic.timeout property to
-    //resolve the property dynamically. Each invocation to Provider#get() will
-    //resolve the latest value from underlying Config.
-    //The existence of configured values will get checked during start-up.
-    //Instances of Provider<T> are guaranteed to be Serializable.
-    // 注入 myprj.some.dynamic.timeout 属性的值的提供程序，以动态解析属性。
+    // 为 myprj.some.dynamic.timeout 属性的值注入一个 Provider，以动态地解析该属性。
     // 每次调用 Provider#get() 时，都会从底层 Config 中解析最新的值。
-    // 在启动期间将检查配置值的存在。
-    // Provider<T> 的实例保证是可序列化的。
+    // 在启动期间将检查配置值是否存在。
+    // Provider<T> 的实例是可序列化的。
     @Inject
     @ConfigProperty(name="myprj.some.dynamic.timeout", defaultValue="100")
     private jakarta.inject.Provider<Long> timeout;
 
-    //Injects a Supplier for the value of myprj.some.supplier.timeout property to
-    //resolve the property dynamically. Each invocation to Supplier#get() will
-    //resolve the latest value from underlying Config.
-    //注入 myprj.some.supplier.timeout 属性的值的 Supplier，以动态解析属性。
-    //每次调用 Supplier#get() 时，都会从底层 Config 中解析最新的值。
+    //为 myprj.some.supplier.timeout 属性的值注入一个 Supplier，以动态地解析该属性。
+    //每次调用 Supplier#get() 都会从底层的 Config 中解析最新的值。
     @Inject
     @ConfigProperty(name="myprj.some.supplier.timeout", defaultValue="100")
     private java.util.function.Supplier<Long> timeout;
 
-    //The following code injects an Array, List or Set for the `myPets` property,
-    //where its value is a comma separated value ( myPets=dog,cat,dog\\,cat)
-    //下面的代码注入了 `myPets` 属性的数组、列表或集合，其中其值是逗号分隔的值（myPets=dog,cat,dog\\,cat）
+    //下面的代码注入了 `myPets` 属性的数组、列表或集合，其值是用逗号分隔的值（myPets=dog,cat,dog\\,cat）
     @Inject @ConfigProperty(name="myPets") private String[] myArrayPets;
     @Inject @ConfigProperty(name="myPets") private List<String> myListPets;
     @Inject @ConfigProperty(name="myPets") private Set<String> mySetPets;
@@ -167,12 +143,11 @@ public class InjectedConfigUsageSample {
 ----
 
 // === Config value conversion rules
-
+//
 // The table below defines the conversion rules, including some special edge case scenarios.
-
 === 配置值转换规则
 
-下表定义了转换规则，包括一些特殊的边界场景。
+下表定义了转换规则，包括一些特殊的的边缘情况。
 
 [cols="1,1,1,2a",options="header"]
 |===
@@ -418,34 +393,29 @@ public class InjectedConfigUsageSample {
 // === Remove config properties
 // Sometimes, there is a need to remove a property. This can be done by setting an empty value or a value causing the corresponding converter returning `null` in a config source.
 // When injecting a property that has been deleted, `DeploymentException` will be thrown unless the return type is `Optional`.
-
 === 移除配置属性
-有时候需要移除一个属性。这可以通过在配置源中设置一个空值或一个导致相应转换器返回 `null` 的值来完成。
-当注入一个已经被删除的属性时，除非返回类型是 `Optional`，否则将抛出 `DeploymentException`。
+有时候需要移除一个属性。这可以通过在配置源中设置一个空值或一个能让相应转换器返回 `null` 的值来完成。
+当注入一个已经被删除的属性时，除非返回类型是 `Optional`，否则会抛出 `DeploymentException` 异常。
 
 // === Aggregate related properties into a CDI bean
-
+//
 // When injecting a number of related configuration properties, it can be tedious to repeat the statement of `ConfigProperty` in scatter places.
 // Since they are related, it makes more sense to aggregate them into a single property class.
+=== 将相关属性聚合到 CDI bean 中
+
+当注入一些相关的配置属性时，，重复在不同的地方声明 `ConfigProperty` 可能会很繁琐。
+因为它们是相关的，所以将它们聚合到单一的属性类中更有意义。
 
 // MicroProfile Config provides a way to look up a number of configuration properties starting with the same prefix using the `@ConfigProperties` annotation, e.g. `ConfigProperties(prefix="myPrefix")`.
 // When annotating a class with `@ConfigProperties` or `@ConfigProperties(prefix="myPrefix")`, any of its fields, regardless of the visibility, maps to a configuration property via the following mapping rules.
-
+//
 // * If the `prefix` is present, the field `x` maps to the configuration property `<prefix>.x`.
 // * If the `prefix` is absent, the field `x` maps to the property name `x`.
-
+//
 // If the field name `x` needs to be different from the config property name `y`, use `@ConfigProperty(name="y")` to perform the transformation.
 // If the prefix is present, the field `x` maps to the configuration property `<prefix>.y`, otherwise `y`.
-
-// Considering the following config sources:
-
-=== 将相关属性聚合到 CDI bean 中
-
-当注入一系列相关的配置属性时，在分散的地方重复声明 `ConfigProperty` 会很繁琐。
-因为它们是相关的，所以将它们聚合到一个单独的属性类中更有意义。
-
-MicroProfile Config 提供了一种方法，可以使用 `@ConfigProperties` 注解查找以相同前缀开头的一系列配置属性，例如 `ConfigProperties(prefix="myPrefix")`。
-当使用 `@ConfigProperties` 或 `@ConfigProperties(prefix="myPrefix")` 注解一个类时，任何它的字段（无论可见性如何）都通过以下映射规则映射到一个配置属性。
+MicroProfile Config 提供了一种使用 `@ConfigProperties` 注解来查找以相同前缀开头的多个配置属性的方法，例如 `ConfigProperties(prefix="myPrefix")`。
+当一个类使用 `@ConfigProperties` 或 `@ConfigProperties(prefix="myPrefix")` 注解时，它的任何字段（无论可见性如何）都通过以下映射规则映射到一个配置属性。
 
 * 如果 `prefix` 存在，则字段 `x` 映射到配置属性 `<prefix>.x`。
 * 如果 `prefix` 不存在，则字段 `x` 映射到属性名 `x`。
@@ -453,6 +423,7 @@ MicroProfile Config 提供了一种方法，可以使用 `@ConfigProperties` 注
 如果字段名 `x` 需要与配置属性名 `y` 不同，则使用 `@ConfigProperty(name="y")` 进行转换。
 如果存在前缀，则字段 `x` 映射到配置属性 `<prefix>.y`，否则为 `y`。
 
+// Considering the following config sources:
 考虑以下配置源：
 
 [source, text]
@@ -478,7 +449,6 @@ old.location=Berlin
 ----
 
 // In order to retrieve the above properties in a single property class, you can use the `@ConfigProperties` annotation with a prefix.
-
 要在单个属性类中获取上述属性，可以使用带有前缀的 `@ConfigProperties` 注解。
 
 [source, java]
@@ -499,16 +469,14 @@ public class Details {
 ----
 
 // You can then use one of the following to retrieve the properties.
-
 你可以使用以下任一方法来获取属性。
 
 // ==== Programmatic lookup of the bean annotated with `@ConfigProperties`
-
+//
 // Since the class with `@ConfigProperties` is a CDI bean, you can use the programmatic lookup provided by CDI, e.g.
+==== 通过编程方式使用 `@ConfigProperties` 注解的 bean
 
-==== 使用 `@ConfigProperties` 注解的 bean 的编程查找
-
-由于带有 `@ConfigProperties` 的类是一个 CDI bean，因此可以使用 CDI 提供的编程查找，例如：
+由于带有 `@ConfigProperties` 的类是一个 CDI bean，因此可以使用 CDI 提供的编程方式查找，例如：
 
 [source, java]
 ----
@@ -516,7 +484,6 @@ Details details = CDI.current().select(Details.class, ConfigProperties.Literal.N
 ----
 
 // ==== Inject the bean annotated with `@ConfigProperties`
-
 ==== 注入带有 `@ConfigProperties` 注解的 bean
 
 [source, java]
@@ -527,7 +494,6 @@ Details serverDetails;
 ----
 
 // The `serverDetails` will contain the following info, as the prefix is `server`:
-
 `serverDetails` 将包含以下信息，因为前缀是 `server`：
 
 [source, properties]
@@ -539,12 +505,11 @@ serverDetails.getLocation() -> server.old.location -> London
 ----
 
 // Specify the prefix attribute on the annotation `@ConfigProperties` when injecting the bean.
-
+//
 // In this case, the prefix associated with `@ConfigProperties` on this injection point overrides the prefix specified on the bean class.
+在注入 bean 时，使用注解 `@ConfigProperties` 上的 prefix 属性指定前缀。
 
-特定注解 `@ConfigProperties` 上的前缀属性在注入 bean 时。
-
-在这种情况下，与此注入点上的 `@ConfigProperties` 关联的前缀覆盖了在 bean 类上指定的前缀。
+在这种情况下，这个注入点上与 `@ConfigProperties` 关联的前缀会覆盖 bean 类上指定的前缀。
 
 [source, java]
 ----
@@ -554,8 +519,7 @@ Details clientDetails;
 ----
 
 // The prefix `client` overrides the prefix `server` on the `ServerDetails` bean. Therefore, this will retrieve the following properties.
-
-前缀 `client` 覆盖了 `ServerDetails` bean 上的前缀 `server`。因此，它将检索以下属性。
+前缀 `client` 覆盖了 `ServerDetails` bean 上的前缀 `server`。因此，它将获取如下属性。
 
 [source, properties]
 ----
@@ -567,8 +531,7 @@ clientDetails.getLocation() -> client.old.location -> Dublin
 
 // If `@ConfigProperties` has no associated prefix at the injection point, it defaults to the prefix set in the `Details`
 // class, `server`.
-
-如果 `@ConfigProperties` 在注入点上没有关联的前缀，则默认为 `Details` 类中设置的前缀 `server`。
+如果 `@ConfigProperties` 在注入点没有关联的前缀，则默认使用 `Details` 类中设置的前缀 `server`。
 
 [source, java]
 ----
@@ -578,8 +541,7 @@ Details details;
 ----
 
 // Therefore, this will retrieve the following properties.
-
-因此，它将检索以下属性。
+因此，它将获取如下属性。
 
 [source, properties]
 ----
@@ -590,7 +552,6 @@ details.getLocation() -> server.old.location -> London
 ----
 
 // If `@ConfigProperties` specifies an empty prefix at the injection point:
-
 如果 `@ConfigProperties` 在注入点上指定了空前缀：
 
 [source, java]
@@ -601,8 +562,7 @@ Details details;
 ----
 
 // It overrides the prefix set on the bean class `server` with an empty string `""`
-
-它用空字符串 `""` 覆盖了 bean 类 `server` 上设置的前缀。
+它用空字符串 `""` 覆盖了 bean 类上设置的前缀 `server`。
 
 [source, properties]
 ----
@@ -613,37 +573,37 @@ details.getLocation() -> old.location -> Berlin
 ----
 
 // ==== ConfigProperties bean class validation
-
+//
 // The configuration properties class should contain a zero-arg constructor. Otherwise, the behaviour is unspecified.
 // When performing property lookup, a `DeploymentException` will be thrown for the following scenarios:
-
+//
+//
 // 1. The property is missing and neither default value nor the property return type is optional.
 // Use one of the following to fix the problem.
 // ** Define a value for the property
 // ** Supply a default value when defining the field.
 // ** Use `@ConfigProperty` to provide a default value.
 // ** Use `Optional<T>` or `OptionalInt`, `OptionalDouble`, `OptionalLong` as the type.
-
+//
 // 2. The property value cannot be converted to the specified type
-
+//
 // If any of the property cannot be found and there is neither default value nor property is not optional, `java.util.NoSuchElementException` will be thrown.
 // In order to avoid this, you can supply a default value when defining the field. Alternatively, you can use `@ConfigProperty` to provide a default value.
 // You can also use `Optional<T>` or OptionalInt, OptionalDouble, OptionalLong as the type. If any property values cannot be converted to the specified type, `java.lang.IllegalArgumentException` will be thrown.
-
 ==== ConfigProperties bean 类验证
 
-配置属性类应包含一个零参数构造函数。否则，行为是未指定的。
-当执行属性查找时，将在以下情况下抛出 `DeploymentException`：
+配置属性类应包含一个无参构造函数。否则，行为是未指定的。
+当执行属性查找时，以下情况将抛出 `DeploymentException` 异常：
 
-1. 属性丢失，既没有默认值也没有属性返回类型是可选的。
+1. 属性缺失，且既没有默认值，属性返回类型也不是 optional。
 使用以下任一方法来解决问题。
-** 定义属性的值
+** 为属性定义一个值
 ** 定义字段时提供默认值。
 ** 使用 `@ConfigProperty` 提供默认值。
 ** 使用 `Optional<T>` 或 `OptionalInt`、`OptionalDouble`、`OptionalLong` 作为类型。
 
 2. 无法将属性值转换为指定的类型
 
-如果找不到任何属性，并且既没有默认值也没有属性是可选的，则将抛出 `java.util.NoSuchElementException`。
-为了避免这种情况，可以在定义字段时提供默认值。或者，可以使用 `@ConfigProperty` 提供默认值。
-您还可以使用 `Optional<T>` 或 OptionalInt、OptionalDouble、OptionalLong 作为类型。如果无法将任何属性值转换为指定的类型，则会抛出 `java.lang.IllegalArgumentException`。
+如果有属性找不到，且既没有默认值也不是 optional 的属性，则将抛出 `java.util.NoSuchElementException` 异常。
+为了避免这种情况，可以在定义字段时提供默认值。或者使用 `@ConfigProperty` 提供一个默认值。
+你还可以使用 `Optional<T>` 或 OptionalInt、OptionalDouble、OptionalLong 作为类型。如果存在属性值无法转换为指定的类型，则会抛出 `java.lang.IllegalArgumentException` 异常。

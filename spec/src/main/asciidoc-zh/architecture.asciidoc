@@ -24,7 +24,7 @@
 == 架构
 
 本规范定义了一个灵活易用的应用程序配置系统。
-它还定义了以可移植方式通过SPI（Service Provider Interface 服务提供者接口）扩展配置机制本身的方法。
+它还定义了以可移植方式通过 SPI（Service Provider Interface 服务提供者接口）扩展配置机制本身的方法。
 
 // === Rationale
 //
@@ -35,10 +35,10 @@
 
 === 基本原理
 
-发布的二进制文件通常包含需要根据部署情况稍微不同的功能。
-这可能是要与之通信的 REST 端点的端口号和 URL（例如，取决于为谁部署的 WAR）。
-甚至可能是需要根据安装情况打开和关闭的整个功能。
-所有这些都必须在不需要重新打包整个应用程序二进制文件的情况下完成。
+发布的二进制文件通常包含一些需要根据部署环境而稍微改变行为的功能。
+可能是要与之通信的 REST 端点的端口号和 URL（例如，为不同客户部署 WAR）。
+甚至可能是需要根据安装情况开启和关闭整个功能特性。
+这些都必须在不重新打包整个应用程序二进制文件的情况下完成。
 
 
 // MicroProfile Config provides a way to achieve this goal by aggregating configuration from many different <<configsource,ConfigSources>> and presents a single merged view to the user.
@@ -46,11 +46,10 @@
 // It also allows to override the defaults from outside or erase the property by simply specifying the property name without providing a value or an empty string as the value,
 // e.g. via an environment variable a Java system property or via a container like Docker.
 // MicroProfile Config also allows to implement and register own configuration sources in a portable way, e.g. for reading configuration values from a shared database in an application cluster.
-
-MicroProfile Config 提供了一种方法来实现此目标，即从许多不同的 <<configsource,配置源>> 聚合配置，并向用户提供单个合并视图。
-这允许应用程序在应用程序中捆绑默认配置。
-它还允许从外部覆盖默认值，或者通过简单地指定属性名称而不提供值或空字符串作为值来擦除属性，例如通过环境变量Java系统属性或通过Docker等容器。
-MicroProfile Config还允许以可移植的方式实现和注册自己的配置源，例如从应用程序集群中的共享数据库中读取配置值。
+MicroProfile Config 提供一种通过从多个不同的<<configsource,配置源>>聚合配置，对用户呈现为一个合并后的配置的方式来实现这个目标。
+它可以在应用程序中捆绑默认配置。
+还可以通过仅指定属性名而不提供值或空字符串作为值，来覆盖或擦除默认值，例如，通过环境变量、Java 系统属性或通过 Docker 等容器。
+MicroProfile Config 可以以一种可移植的方式实现和注册自己的配置源，例如，从应用程序集群共享数据库中读取配置值。
 
 
 
@@ -59,10 +58,10 @@ MicroProfile Config还允许以可移植的方式实现和注册自己的配置�
 //
 // The configuration key might use dot-separated blocks to prevent name conflicts. This is similar to Java package namespacing:
 
-在 MicroProfile Config 内部，其核心机制纯粹是基于 String/String 的。
-类型安全性是通过在将值交给调用者之前使用适当的 <<converters,转换器>> 来有意地提供的。
+在 MicroProfile Config 内部，其核心机制完全是基于 String/String 的。
+类型安全性由在将值交给调用者之前使用的适当<<converters,转换器>>提供。
 
-配置键可能使用点分隔的块来防止名称冲突。这与 Java 包命名空间类似：
+配置键可以使用点分隔的块来防止名称冲突。这与 Java 包命名空间类似：
 
 [source, text]
 ----

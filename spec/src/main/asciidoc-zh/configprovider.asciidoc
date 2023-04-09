@@ -19,49 +19,76 @@
 // Mark Struberg
 // Emily Jiang
 [[configprovider]]
-== Accessing or Creating a certain Configuration
+
+// == Accessing or Creating a certain Configuration
+== 访问或创建特定配置
 
 
-For using MicroProfile Config in a programmatic way the `ConfigProvider` class is the central point to access a configuration.
-It allows access to different configurations (represented by a `Config` instance) based on the application in which it is used.
-The `ConfigProvider` internally delegates through to the `ConfigProviderResolver` which contains more low-level functionality.
+// For using MicroProfile Config in a programmatic way the `ConfigProvider` class is the central point to access a configuration.
+// It allows access to different configurations (represented by a `Config` instance) based on the application in which it is used.
+// The `ConfigProvider` internally delegates through to the `ConfigProviderResolver` which contains more low-level functionality.
+为了以编程方式使用 MicroProfile Config，`ConfigProvider` 类是访问配置的中心点。
+它允许根据使用它的应用访问不同的配置（表示为 `Config` 实例）。
+`ConfigProvider` 内部委托给 `ConfigProviderResolver`，该类包含更多底层功能。
 
-There are 4 different ways to create a `Config` instance:
+// There are 4 different ways to create a `Config` instance:
+有 4 种不同的方法来创建 `Config` 实例：
 
-* In CDI managed components, a user can use `@Inject` to access the current application configuration.
-  The default and the auto discovered <<configsource,ConfigSources>> will be gathered to form a configuration.
-  The default and the auto discovered <<converters,Converters>> will be gathered to form a configuration.
-  Injected instance of `Config` should behave the same as the one retrieved by `ConfigProvider.getConfig()`.
-  Injected config property values should be the same as if retrieved from an injected `Config` instance via `Config.getValue()`.
+// * In CDI managed components, a user can use `@Inject` to access the current application configuration.
+//   The default and the auto discovered <<configsource,ConfigSources>> will be gathered to form a configuration.
+//   The default and the auto discovered <<converters,Converters>> will be gathered to form a configuration.
+//   Injected instance of `Config` should behave the same as the one retrieved by `ConfigProvider.getConfig()`.
+//   Injected config property values should be the same as if retrieved from an injected `Config` instance via `Config.getValue()`.
+* 在 CDI 管理的组件中，用户可以使用 `@Inject` 来访问当前应用配置。
+  默认的和自动发现的<<configsource,配置源>>将被收集起来形成一个配置。
+  默认的和自动发现的<<converters,转换器>>将被收起来形成一个配置。
+  注入的 `Config` 实例应该与通过 `ConfigProvider.getConfig()` 获取的实例表现一致。
+  注入的配置属性值应该与用注入的 `Config` 实例通过 `Config.getValue()`获取一致。
 
-* A factory method `ConfigProvider#getConfig()` to create a `Config` object based on automatically picked up `ConfigSources`
-  of the Application identified by the current Thread Context ClassLoader classpath.
-  The default and the auto discovered <<converters,Converters>> will be gathered to form a configuration.
-  Subsequent calls to this method for a certain Application will return the same `Config` instance.
+// * A factory method `ConfigProvider#getConfig()` to create a `Config` object based on automatically picked up `ConfigSources`
+//   of the Application identified by the current Thread Context ClassLoader classpath.
+//   The default and the auto discovered <<converters,Converters>> will be gathered to form a configuration.
+//   Subsequent calls to this method for a certain Application will return the same `Config` instance.
+* 工厂方法 `ConfigProvider#getConfig()` 基于当前线程上下文类加载器的类路径自动选择 `ConfigSources` 创建一个 `Config` 对象。
+  默认的和自动发现的<<converters,转换器>>将被收集起来形成一个配置。
+  对同一个应用，后续调用此方法将返回相同的 `Config` 实例。
 
-* A factory method `ConfigProvider#getConfig(ClassLoader forClassLoader)` to create a `Config`   object based on automatically picked up `ConfigSources`
-  of the Application identified by the given ClassLoader.
-  The default and the auto discovered <<converters,Converters>> will be gathered to form a configuration.
-  This can be used if the Thread Context ClassLoader does not represent the correct layer.
-  E.g. if you need the Config for a class in a shared EAR lib folder.
-  Subsequent calls to this method for a certain Application will return the same `Config` instance.
+// * A factory method `ConfigProvider#getConfig(ClassLoader forClassLoader)` to create a `Config` object based on automatically picked up `ConfigSources`
+//   of the Application identified by the given ClassLoader.
+//   The default and the auto discovered <<converters,Converters>> will be gathered to form a configuration.
+//   This can be used if the Thread Context ClassLoader does not represent the correct layer.
+//   E.g. if you need the Config for a class in a shared EAR lib folder.
+//   Subsequent calls to this method for a certain Application will return the same `Config` instance.
+* 工厂方法 `ConfigProvider#getConfig(ClassLoader forClassLoader)` 基于给定的类加载器自动选择 `ConfigSources` 来创建一个 `Config` 对象。
+  默认和自动发现的<<converters,转换器>>将被收集并形成配置。
+  这可以用于当线程上下文类加载器不代表正确的层次的情况。
+  例如，如果你需要一个在共享 EAR lib 文件夹中的类的配置。
+  对同一个应用，后续调用此方法将返回相同的 `Config` 实例。
 
-* A factory method `ConfigProviderResolver#getBuilder()` to create a `ConfigBuilder` object.
-The builder has no config sources. Only the default converters are added. The `ConfigBuilder` object can be filled manually via methods like `ConfigBuilder#withSources(ConfigSources... sources)`.
-   This configuration instance will by default not be shared by the `ConfigProvider`.
-  This method is intended be used if an IoC container or any other external Factory can be used to give access to a manually created shared `Config`.
-** Create a builder:
+// * A factory method `ConfigProviderResolver#getBuilder()` to create a `ConfigBuilder` object.
+// The builder has no config sources. Only the default converters are added. The `ConfigBuilder` object can be filled manually via methods like `ConfigBuilder#withSources(ConfigSources... sources)`.
+//    This configuration instance will by default not be shared by the `ConfigProvider`.
+//   This method is intended be used if an IoC container or any other external Factory can be used to give access to a manually created shared `Config`.
+* 工厂方法 `ConfigProviderResolver#getBuilder()` 创建一个 `ConfigBuilder` 对象。
+  构建器没有配置源。只添加了默认的转换器。`ConfigBuilder` 对象可以通过 `ConfigBuilder#withSources(ConfigSources... sources)` 等方法手动填充。
+  默认情况下，此配置实例不会由 `ConfigProvider` 共享。
+  该方法适用于可以使用 IoC 容器或任何其他外部工厂来访问手动创建的共享 `Config` 的情况。
+
+// ** Create a builder:
+** 创建一个构建器：
 +
 ```
 ConfigProviderResolver resolver = ConfigProviderResolver.instance();
 ConfigBuilder builder = resolver.getBuilder();
 ```
-** Add config sources and build:
+// ** Add config sources and build:
+** 添加配置源并构建：
 +
 ```
 Config config = builder.addDefaultSources().withSources(mySource).withConverters(myConverter).build;
 ```
-** (optional) Manage the lifecycle of the config
+// ** (optional) Manage the lifecycle of the config
+** （可选）管理配置的生命周期
 +
 ```
 resolver.registerConfig(config, classloader);
@@ -69,23 +96,33 @@ resolver.releaseConfig(config);
 ```
 
 
-The `Config` object created via builder pattern can be managed as follows:
+// The `Config` object created via builder pattern can be managed as follows:
+通过构建器模式创建的 `Config` 对象可以按以下方式进行管理：
 
-* A factory method `ConfigProviderResolver#registerConfig(Config config, ClassLoader classloader)` can be used to register a `Config` within the application.
-  This configuration instance *will* be shared by `ConfigProvider#getConfig()`.
-  Any subsequent call to `ConfigProvider#getConfig()` will return the registered `Config` instance for this application.
+// * A factory method `ConfigProviderResolver#registerConfig(Config config, ClassLoader classloader)` can be used to register a `Config` within the application.
+//   This configuration instance *will* be shared by `ConfigProvider#getConfig()`.
+//   Any subsequent call to `ConfigProvider#getConfig()` will return the registered `Config` instance for this application.
+* 工厂方法 `ConfigProviderResolver#registerConfig(Config config, ClassLoader classloader)` 可用于在应用中注册一个 `Config`。
+  此配置实例**将**被 `ConfigProvider#getConfig()` 共享。
+  任何后续对 `ConfigProvider#getConfig()` 的调用都将返回此应用已注册的 `Config` 实例。
 
-* A factory method `ConfigProviderResolver#releaseConfig(Config config)` to release the `Config` instance. This will unbind the current `Config` from the application.
-The <<configsource, ConfigSources>> that implement the `java.io.Closeable` interface will be properly destroyed.
-The <<converters, Converters>> that implement the `java.io.Closeable` interface will be properly destroyed.
-Any subsequent call to `ConfigProvider#getConfig()` or `ConfigProvider#getConfig(ClassLoader forClassLoader)` will result in a new `Config` instance.
-
-All methods in the `ConfigProvider`, `ConfigProviderResolver` and `Config` implementations are thread safe and reentrant.
-
-The `Config` instances created via CDI are `Serializable`.
-
-If a `Config` instance is created via `@Inject Config` or `ConfigProvider#getConfig()` or via the builder pattern but later called `ConfigProviderResolver#registerConfig(Config config, Classloader classloader)`, the `Config` instance will be released when the application is closed.
+// * A factory method `ConfigProviderResolver#releaseConfig(Config config)` to release the `Config` instance. This will unbind the current `Config` from the application.
+// The <<configsource, ConfigSources>> that implement the `java.io.Closeable` interface will be properly destroyed.
+// The <<converters, Converters>> that implement the `java.io.Closeable` interface will be properly destroyed.
+// Any subsequent call to `ConfigProvider#getConfig()` or `ConfigProvider#getConfig(ClassLoader forClassLoader)` will result in a new `Config` instance.
+* 工厂方法 `ConfigProviderResolver#releaseConfig(Config config)` 释放 `Config` 实例。这将从应用中解绑当前的 `Config`。
+ 实现 `java.io.Closeable` 接口的<<configsource, 配置源>>将被销毁。
+ 实现 `java.io.Closeable` 接口的<<converters, 转换器>>将被销毁。
+ 任何后续对 `ConfigProvider#getConfig()` 或 `ConfigProvider#getConfig(ClassLoader forClassLoader)` 的调用都将会返回新的 `Config` 实例。
 
 
+// All methods in the `ConfigProvider`, `ConfigProviderResolver` and `Config` implementations are thread safe and reentrant.
+`ConfigProvider`、`ConfigProviderResolver` 和 `Config` 实现中的所有方法都是线程安全的和可重入的。
+
+// The `Config` instances created via CDI are `Serializable`.
+通过 CDI 创建的 `Config` 实例是 `Serializable` 的。
+
+// If a `Config` instance is created via `@Inject Config` or `ConfigProvider#getConfig()` or via the builder pattern but later called `ConfigProviderResolver#registerConfig(Config config, Classloader classloader)`, the `Config` instance will be released when the application is closed.
+如果通过 `@Inject Config` 或 `ConfigProvider#getConfig()` 或通过构建器模式创建了 `Config` 实例，但稍后调用了 `ConfigProviderResolver#registerConfig(Config config, Classloader classloader)`，则在关闭应用时将释放 `Config` 实例。
 
 <<<

@@ -24,19 +24,17 @@
 // == Config Profile
 //
 // Config Profile indicates the project phase, such as dev, testing, live, etc.
+== Config Profile
 
-== 配置
-
-配置文件指示项目阶段，例如开发，测试，生产等。
+Config Profile 指明项目所处阶段，例如开发，测试，生产等。
 
 // === Specify Config Profile
 //
 // The config profile can be specified via the property `mp.config.profile`, which can be set in any of the configuration sources. The value of the property can contain only characters that are valid for config property names.
 // This is because the name of the profile is directly stored in the name of the config property. It can be set when starting your application. e.g.
+=== 指定 Config Profile
 
-=== 指定配置文件
-
-配置文件可以通过属性 `mp.config.profile` 指定，该属性可以在任何配置源中设置。属性值只能包含有效的配置属性名称中的字符。
+Config Profile 可以通过属性 `mp.config.profile` 指定，该属性可以在任何配置源中设置。该属性的值只能包含对配置属性名称有效的字符。
 这是因为配置文件的名称直接存储在配置属性的名称中。可以在启动应用程序时设置。例如：
 
 [source, text]
@@ -48,26 +46,27 @@ java -jar myapp.jar -Dmp.config.profile=testing
 //
 // The value of the property `mp.config.profile` specifies a single active profile. Implementations are free to provide additional mechanisms to support multiple active profiles.
 // If the property `mp.config.profile` is specified in multiple config sources, the value of the property is determined following the same rules as other configuration properties, which means the value in the config source with the highest ordinal wins.
-
-属性 `mp.config.profile` 的值不应在应用程序启动后更新。它只读取一次，一旦构造 `Config` 对象，就不会更新。如果 `mp.config.profile` 的属性值在之后被修改，行为是未定义的，并且实现可以忽略对其值的任何更改。
-如果在多个配置源中指定了属性 `mp.config.profile`，则属性的值将根据与其他配置属性相同的规则确定，这意味着具有最高序数的配置源中的值获胜。
-
+不应在应用程序启动后更新 `mp.config.profile` 属性的值。它只读取一次，且构造出 `Config` 对象后就不会再更新。如果 `mp.config.profile` 的属性值在这之后被修改，它的行为是不可预期的，具体实现上可以忽略对其值的任何更改。
+`mp.config.profile` 属性的值指定了一个生效的 profile。具体实现可以自由地提供额外的机制来支持多个生效的 profile。
+如果在多个配置源中指定了 `mp.config.profile` 属性，则最终属性值将按照与其他配置属性相同的规则确定，也就是会优先采用高优先级配置源中的值。
 
 // === How Config Profile works
-
-=== 配置文件如何工作
+=== Config Profile 如何生效
 
 // ==== On Property level
 // The configuration property that utilizes the Config Profile is called a "profile-specific" property. A "profile-specific" property name consists of the following sequence: `% <profile name>.<original property name>`.
 //
 // Conforming implementations are required to search for a configuration source with the highest ordinal (priority) that provides either the property name or the "profile-specific" property name.
 // If the configuration source provides the "profile-specific" name, the value of the "profile-specific" property will be returned. If it doesn't contain the "profile-specific" name, the value of the plain property will be returned.
+==== 属性层级
 
-==== 在属性层
-配置属性
+利用 Config Profile 的配置属性称为 “profile-specific” 属性。“profile-specific” 属性名称由以下序列组成：`% <profile 名称>.<初始属性名>`
+
+符合规范的实现必须搜索优先级（ordinal）最高的配置源，该配置源提供普通属性名或 “profile-specific” 属性名。
+如果配置源提供了 “profile-specific” 属性名，则将返回 “profile-specific” 属性的值。如果它不包含 “profile-specific” 属性，则将返回普通属性的值。
 
 // For instance, a config source can be specified as follows.
-例如：配置源可以用下面这种方式指定
+例如，配置源可以通过如下方式指定
 
 [source, text]
 ----
@@ -78,8 +77,7 @@ vehicle.name=lorry
 ----
 
 // A config property associated with the Config Profile can be looked up as shown below.
-
-配置属性关联配置
+可用如下方式查找与 Config Profile 关联的配置属性。
 
 [source, text]
 ----
@@ -94,18 +92,28 @@ String vehicleName = ConfigProvider.getConfig().getValue("vehicle.name", String.
 // If the property `mp.config.profile` is set to `dev`, the property `%dev.vehicle.name` is the Active Property. An active property overrides the properties in the same config source.
 // In more details, if `mp.config.profile` is set to `dev`, the property `%dev.vehicle.name` overrides the property `vehicle.name`. The `vehicleName` will be set to `car`.
 // The properties `%live.vehicle.name` and `%testing.vehicle.name` are inactive config properties and don't override the property `vehicle.name`.
+如果 `mp.config.profile` 设置为 `dev`，则属性 `%dev.vehicle.name` 是生效的属性。生效的属性会覆盖同一配置源中的属性。
+更详细的说，如果 `mp.config.profile` 设置为 `dev`，`%dev.vehicle.name` 属性会覆盖 `vehicle.name` 属性。`vehicleName` 的值是 `car`。
+`%live.vehicle.name` 和 `%testing.vehicle.name` 属性是非生效的配置属性，不会覆盖 `vehicle.name` 属性。
 
-如果属性
+// If `mp.config.profile` is set to `live`, the property `%live.vehicle.name` is the active property. The `vehicleName` will be `train`. Similarly, `bike` will be the value of `vehicleName`, if the profile is `testing`.
+如果 `mp.config.profile` 设置为 `live`，则属性 `%live.vehicle.name` 是生效的属性。`vehicleName` 的值是 `train`。同样地，如果配置文件是 `testing`，则`vehicleName`的值为 `bike`。
 
-If `mp.config.profile` is set to `live`, the property `%live.vehicle.name` is the active property. The `vehicleName` will be `train`. Similarly, `bike` will be the value of `vehicleName`, if the profile is `testing`.
 
-==== On Config Source level
+// ==== On Config Source level
 
-Config Profile also affects the default config source `microprofile-config.properties`. If multiple config sources exist under the `META-INF` folder on the classpath with the name like `microprofile-config-<profile_name>.properties`,
-the config source matching the active profile name will also be loaded on top of the default config source `microprofile-config.properties`. It means if the same property specified in both config sources, the value from the config source
-`microprofile-config-<profile_name>.properties` will be used instead. If the property `mp.config.profile` is specified in the `microprofile-config-<profile_name>.properties`, this property will be discarded.
+// Config Profile also affects the default config source `microprofile-config.properties`. If multiple config sources exist under the `META-INF` folder on the classpath with the name like `microprofile-config-<profile_name>.properties`,
+// the config source matching the active profile name will also be loaded on top of the default config source `microprofile-config.properties`. It means if the same property specified in both config sources, the value from the config source
+// `microprofile-config-<profile_name>.properties` will be used instead. If the property `mp.config.profile` is specified in the `microprofile-config-<profile_name>.properties`, this property will be discarded.
+==== 配置源层级
 
-For instance, there are following config sources provided in your application.
+Config Profile 也会影响默认的配置 `microprofile-config.properties`。如果在类路径上的`META-INF`文件夹下存在多个以类似于`microprofile-config-<profile_name>.properties`的名称命名的配置源，
+则与生效的 profile 名称匹配的配置源也将加载到默认配置源 `microprofile-config.properties` 之上。这意味着如果在两个配置源中指定了同一属性，
+将使用来自配置源 `microprofile-config-<profile_name>.properties` 值。
+如果在 `microprofile-config-<profile_name>.properties` 中指定了属性 `mp.config.profile`，则此属性会被丢弃。
+
+// For instance, there are following config sources provided in your application.
+例如，在你的应用程序中提供了以下配置源。
 
 ```
 META-INF\microprofile-config.properties
@@ -113,6 +121,10 @@ META-INF\microprofile-config-dev.properties
 META-INF\microprofile-config-prod.properties
 META-INF\microprofile-config-testing.properties
 ```
-If the property `mp.config.profile` is set to `dev`, the config source `microprofile-config-dev.properties` will be loaded onto the config source of `microprofile-config.properties`.
-Similarly, if `mp.config.profile` is set to `prod`, the config source `microprofile-config-prod.properties` will be loaded onto the config source of `microprofile-config.properties`.
-However, if `mp.config.profile` is set to `live`, no additional property file will be loaded on the top of `microprofile-config.properties` as the config source `microprofile-config-live.properties` does not exist.
+
+// If the property `mp.config.profile` is set to `dev`, the config source `microprofile-config-dev.properties` will be loaded onto the config source of `microprofile-config.properties`.
+// Similarly, if `mp.config.profile` is set to `prod`, the config source `microprofile-config-prod.properties` will be loaded onto the config source of `microprofile-config.properties`.
+// However, if `mp.config.profile` is set to `live`, no additional property file will be loaded on the top of `microprofile-config.properties` as the config source `microprofile-config-live.properties` does not exist.
+如果属性 `mp.config.profile` 设置为 `dev`，则配置源 `microprofile-config-dev.properties`将加载到配置源 `microprofile-config.properties` 之上。
+同样，如果 `mp.config.profile` 设置为 `prod`，则配置源 `microprofile-config-prod.properties` 将加载到配置源 `microprofile-config.properties` 之上。
+但是，如果 `mp.config.profile` 设置为 `live`，则不会在 `microprofile-config.properties` 之上加载任何额外的属性文件，因为配置源 `microprofile-config-live.properties` 不存在。

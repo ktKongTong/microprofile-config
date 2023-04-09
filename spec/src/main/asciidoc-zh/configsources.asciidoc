@@ -21,28 +21,45 @@
 // Jeff Mesnil
 
 [[configsource]]
-== ConfigSources
+// == ConfigSources
+== 配置源（ConfigSources）
 
-A `ConfigSource` is exactly what its name says: a source for configured values.
-The `Config` uses all configured implementations of `ConfigSource` to look up the property in question. Dynamically added config sources after the `Config` object has been built would be ignored, 
-which means `Config.getConfigSources` always returns the same collection of ``ConfigSource``s. The same rule applies to `ConfigSourceProvider.getConfigSources`.
+// A `ConfigSource` is exactly what its name says: a source for configured values.
+// The `Config` uses all configured implementations of `ConfigSource` to look up the property in question. Dynamically added config sources after the `Config` object has been built would be ignored,
+// which means `Config.getConfigSources` always returns the same collection of ``ConfigSource``s. The same rule applies to `ConfigSourceProvider.getConfigSources`.
 
-=== ConfigSource Ordering
+顾名思义，`ConfigSource` 是配置值的来源。
+`Config` 使用所有配置的 `ConfigSource` 实现来查找相关的属性。在 `Config` 对象被构建之后动态添加的配置源将被忽略， 这意味着 `Config.getConfigSources` 总是返回相同的 ``ConfigSource`` 集合。同样的规则也适用于 `ConfigSourceProvider.getConfigSources`。
 
-Each `ConfigSource` has a specified `ordinal`, which is used to determine the importance of the values taken from the associated `ConfigSource`.
-A higher `ordinal` means that the values taken from this `ConfigSource` will override values from lower priority <<ConfigSource,ConfigSources>>.
-This allows a configuration to be customized from outside a binary, assuming that external `ConfigSource` s have higher `ordinal` values than the ones whose values originate within the release binaries.
+// === ConfigSource Ordering
+=== 配置源排序
 
-It can also be used to implement a drop-in configuration approach.
-Simply create a jar containing a `ConfigSource` with a higher ordinal and override configuration values in it. Specifying an empty string as the value effectively erases the property.
-If the jar is present on the classpath then it will override configuration values from <<ConfigSource,ConfigSources>> with lower `ordinal` values.
+// Each `ConfigSource` has a specified `ordinal`, which is used to determine the importance of the values taken from the associated `ConfigSource`.
+// A higher `ordinal` means that the values taken from this `ConfigSource` will override values from lower priority <<ConfigSource,ConfigSources>>.
+// This allows a configuration to be customized from outside a binary, assuming that external `ConfigSource` s have higher `ordinal` values than the ones whose values originate within the release binaries.
+每个 `ConfigSource` 都有一个指定的 `ordinal`，用于确定从关联的 `ConfigSource` 中获取的值的重要性。
+更高的 `ordinal` 意味着从该 `ConfigSource` 取的值将覆盖低优先级<<configsource,配置源>>的值。
+假设外部的 `ConfigSource` 有比那些值来源于发布二进制文件的更高的 `ordinal` 值，这使得可以在二进制文件之外自定义配置。
 
-=== Manually defining the Ordinal of a built-in ConfigSource
+// It can also be used to implement a drop-in configuration approach.
+// Simply create a jar containing a `ConfigSource` with a higher ordinal and override configuration values in it. Specifying an empty string as the value effectively erases the property.
+// If the jar is present on the classpath then it will override configuration values from <<ConfigSource,ConfigSources>> with lower `ordinal` values.
+它也可以用来实现一个即插即用的配置方法。
+只需创建一个包含有更高优先级的 ConfigSource 的 jar 文件，并在其中覆盖配置值。
+将空字符串作为值，就相当于删除了该属性。
+如果 jar 文件存在于类路径中，那么它将覆盖具有较低 `ordinal` 值的<<configsource,配置源>>中的配置值。
 
-Note that a special property `config_ordinal` can be set within any built-in `ConfigSource` implementation.
-The default implementation of `getOrdinal()` will attempt to read this value.
-If found and a valid integer, the value will be used.
-Otherwise the respective default value will be used.
+// === Manually defining the Ordinal of a built-in ConfigSource
+=== 手动定义内置 ConfigSource 的 Ordinal
+
+// Note that a special property `config_ordinal` can be set within any built-in `ConfigSource` implementation.
+// The default implementation of `getOrdinal()` will attempt to read this value.
+// If found and a valid integer, the value will be used.
+// Otherwise the respective default value will be used.
+请注意，可以在任何内置的 `ConfigSource` 实现中设置一个特殊属性 `config_ordinal`。
+`getOrdinal()` 的默认实现将尝试读取此值。
+如果找到并且是有效的整数，则将使用该值。
+否则将使用各自的默认值。
 
 [source, text]
 ----
@@ -52,34 +69,56 @@ com.acme.myproject.someserver.url = http://more_important.server/some/endpoint
 
 
 [[default_configsources]]
-=== Default ConfigSources
 
-A MicroProfile Config implementation must provide <<ConfigSource,ConfigSources>> for the following data out of the box:
+// === Default ConfigSources
+=== 默认配置源
 
-* System properties (default ordinal=400).
-* Environment variables (default ordinal=300).
-* A `ConfigSource` for each property file `META-INF/microprofile-config.properties` found on the classpath. (default ordinal = 100).
+// A MicroProfile Config implementation must provide <<ConfigSource,ConfigSources>> for the following data out of the box:
+//
+// * System properties (default ordinal=400).
+// * Environment variables (default ordinal=300).
+// * A `ConfigSource` for each property file `META-INF/microprofile-config.properties` found on the classpath. (default ordinal = 100).
+MicroProfile Config 的实现必须提供以下数据的<<configsource,配置源>>：
+
+* 系统属性（默认 ordinal=400）。
+* 环境变量（默认 ordinal=300）。
+* 每个在类路径上找到的属性文件 `META-INF/microprofile-config.properties` 的 `ConfigSource`。（默认 ordinal = 100）。
 
 [[default_configsources.env.mapping]]
-==== Environment Variables Mapping Rules
-
-Some operating systems allow only alphabetic characters or an underscore, `_`, in environment variables. Other characters such as `., /`, etc may be disallowed. In order to set a value for a config property that has a name containing such disallowed characters from an environment variable, the following rules are used.
-
-The `ConfigSource` for the environment variables searches three environment variables for a given property name (e.g. `com.ACME.size`):
-
+// ==== Environment Variables Mapping Rules
+//
+// Some operating systems allow only alphabetic characters or an underscore, `_`, in environment variables. Other characters such as `., /`, etc may be disallowed. In order to set a value for a config property that has a name containing such disallowed characters from an environment variable, the following rules are used.
+//
+// The `ConfigSource` for the environment variables searches three environment variables for a given property name (e.g. `com.ACME.size`):
+//
   1. Exact match (i.e. `com.ACME.size`)
   2. Replace each character that is neither alphanumeric nor `\_` with `_` (i.e. `com_ACME_size`)
   3. Replace each character that is neither alphanumeric nor `\_` with `_`; then convert the name to upper case (i.e. `COM_ACME_SIZE`)
+//
+// The first environment variable that is found is returned by this `ConfigSource`.
+=== 环境变量映射规则
 
-The first environment variable that is found is returned by this `ConfigSource`.
+一些操作系统只允许在环境变量中使用字母字符或下划线 `_`。可能禁止其他字符（例如 `., /` 等）。为了从环境变量中设置包含这些“非法”字符的配置属性名称的值，使用以下规则。
+
+环境变量的 `ConfigSource` 为给定属性名称（例如 `com.ACME.size`）搜索三个环境变量：
+
+1. 精确匹配（即 `com.ACME.size`）
+2. 用 `\_` 替换每个既不是字母数字也不是 `_` 的字符（即 `com_ACME_size`）
+3. 用 `\_` 替换每个既不是字母数字也不是 `_` 的字符；然后将名称转换为大写（即 `COM_ACME_SIZE`）
+
+这个 `ConfigSource` 会返回找到的第一个环境变量。
 
 
 [[custom_configsources]]
-=== Custom ConfigSources
+// === Custom ConfigSources
+//
+// <<configsource,ConfigSources>> are discovered using the `java.util.ServiceLoader` mechanism.
+//
+// To add a custom `ConfigSource`, implement the interface `org.eclipse.microprofile.config.spi.ConfigSource`.
+=== 自定义配置源
+使用 `java.util.ServiceLoader` 机制发现<<configsource,配置源>>。
 
-<<configsource,ConfigSources>> are discovered using the `java.util.ServiceLoader` mechanism.
-
-To add a custom `ConfigSource`, implement the interface `org.eclipse.microprofile.config.spi.ConfigSource`.
+要添加自定义 `ConfigSource`，请实现接口 `org.eclipse.microprofile.config.spi.ConfigSource`。
 
 [source, java]
 ----
@@ -114,19 +153,28 @@ public class CustomDbConfigSource implements ConfigSource {
 
 ----
 
-Then register your implementation in a resource file `/META-INF/services/org.eclipse.microprofile.config.spi.ConfigSource` by including the fully qualified class name of the custom implementation in the file.
+// Then register your implementation in a resource file `/META-INF/services/org.eclipse.microprofile.config.spi.ConfigSource` by including the fully qualified class name of the custom implementation in the file.
+然后在资源文件 `/META-INF/services/org.eclipse.microprofile.config.spi.ConfigSource` 中注册实现，即在文件中包含自定义实现的完全限定类名。
 
 
-=== Custom ConfigSources via ConfigSourceProvider
+// === Custom ConfigSources via ConfigSourceProvider
+//
+// If you need dynamic <<configsource,ConfigSources>> you can also register a `ConfigSourceProvider` in a similar manner.
+// This is useful if you need to dynamically pick up multiple <<configsource,ConfigSources>> of the same kind;
+// for example, to pick up all `myproject.properties` resources from all the JARs in your classpath.
+=== 通过 ConfigSourceProvider 自定义配置源
 
-If you need dynamic <<configsource,ConfigSources>> you can also register a `ConfigSourceProvider` in a similar manner.
-This is useful if you need to dynamically pick up multiple <<configsource,ConfigSources>> of the same kind;
-for example, to pick up all `myproject.properties` resources from all the JARs in your classpath.
+如果需要动态<<configsource,配置源>>，也可以用类似的方式注册一个 `ConfigSourceProvider`。
+这在你需要动态地获取同一种类型的多个<<configsource,配置源>>时会很有用；
+例如，从类路径中的所有 JAR 文件中获取所有 `myproject.properties` 资源。
 
-A custom `ConfigSourceProvider` must implement the interface `org.eclipse.microprofile.config.spi.ConfigSourceProvider`.
-Register your implementation in a resource file `/META-INF/services/org.eclipse.microprofile.config.spi.ConfigSourceProvider` by including the fully qualified class name of the custom implementation/s in the file.
+// A custom `ConfigSourceProvider` must implement the interface `org.eclipse.microprofile.config.spi.ConfigSourceProvider`.
+// Register your implementation in a resource file `/META-INF/services/org.eclipse.microprofile.config.spi.ConfigSourceProvider` by including the fully qualified class name of the custom implementation/s in the file.
+自定义 `ConfigSourceProvider` 必须实现接口 `org.eclipse.microprofile.config.spi.ConfigSourceProvider`。
+然后在资源文件 `/META-INF/services/org.eclipse.microprofile.config.spi.ConfigSourceProvider` 中注册你的实现，即在文件中包含自定义实现的完全限定类名。
 
-An example which registers all YAML files with the name `exampleconfig.yaml`:
+// An example which registers all YAML files with the name `exampleconfig.yaml`:
+以下示例注册了所有名称为 `exampleconfig.yaml` 的 YAML 文件：
 
 [source, java]
 ----
@@ -146,34 +194,53 @@ public class ExampleYamlConfigSourceProvider
 }
 ----
 
-Please note that a single `ConfigSource` should be either registered directly or via a `ConfigSourceProvider`, but never both ways.
+// Please note that a single `ConfigSource` should be either registered directly or via a `ConfigSourceProvider`, but never both ways.
+请注意，单个 `ConfigSource` 应该直接注册或通过 `ConfigSourceProvider` 注册，但不应同时使用两种方式。
 
-=== Dynamic ConfigSource
+// === Dynamic ConfigSource
+//
+// As a `ConfigSource` is a view of configuration data, its data may be changing, or unchanging.
+// If the data is changing, and a `ConfigSource` can represent its changes, we call that `ConfigSource` a dynamic `ConfigSource`, since at any two moments two operations on it may reflect two different sets of underlying configuration data.
+// If instead the data is unchanging, we call the `ConfigSource` a static `ConfigSource`, since at any two moments two operations on it will reflect only one set of underlying (unchanging) configuration data.
+// A caller cannot know whether a `ConfigSource` is dynamic or static.
 
-As a `ConfigSource` is a view of configuration data, its data may be changing, or unchanging. 
-If the data is changing, and a `ConfigSource` can represent its changes, we call that `ConfigSource` a dynamic `ConfigSource`, since at any two moments two operations on it may reflect two different sets of underlying configuration data. 
-If instead the data is unchanging, we call the `ConfigSource` a static `ConfigSource`, since at any two moments two operations on it will reflect only one set of underlying (unchanging) configuration data. 
-A caller cannot know whether a `ConfigSource` is dynamic or static. 
+=== 动态配置源
 
-For the property lookup, the method `config.getValue()` or `config.getOptionalValue()` retrieves the up-to-date value.
-Alternatively, for the injection style, the following lookup should be used to retrieve the up-to-date value.
+由于 `ConfigSource` 是配置数据的视图，因此其数据可能变化，也可能不变。
+如果数据是变化的，并且 `ConfigSource` 可以表示其变化，那么我们称该 `ConfigSource` 为动态 `ConfigSource`，因为在任何两个时刻，对它的两个操作都可能反映两组不同的底层配置数据。
+如果数据不变，则称该 `ConfigSource` 为静态 `ConfigSource`，因为在任何两个时刻，对它的两个操作都只会反映一组底层（不变）配置数据。
+调用者无法知道 `ConfigSource` 是动态的还是静态的。
+
+// For the property lookup, the method `config.getValue()` or `config.getOptionalValue()` retrieves the up-to-date value.
+// Alternatively, for the injection style, the following lookup should be used to retrieve the up-to-date value.
+对于属性查找，方法 `config.getValue()` 或 `config.getOptionalValue()` 获取最新的值。
+相对的，注入风格中应使用以下查找来获取最新的值。
 [source, text]
 ----
     @Inject
     @ConfigProperty(name="myprj.some.dynamic.timeout", defaultValue="100")
-    private jakarta.inject.Provider<Long> timeout; 
+    private jakarta.inject.Provider<Long> timeout;
 ----
-Whether a `ConfigSource` supports this dynamic behavior or not depends on how it's implemented.
-For instance, the default `ConfigSource` microprofile-config.properties and Environment Variables are not dynamic 
-while System Properties are dynamic by nature. MicroProfile Config Implementation can decide whether 
-a `ConfigSource` can be dynamic or not.
+// Whether a `ConfigSource` supports this dynamic behavior or not depends on how it's implemented.
+// For instance, the default `ConfigSource` microprofile-config.properties and Environment Variables are not dynamic
+// while System Properties are dynamic by nature. MicroProfile Config Implementation can decide whether
+// a `ConfigSource` can be dynamic or not.
+`ConfigSource` 是否支持此动态行为取决于它是如何实现的。
+例如，默认的 `ConfigSource` microprofile-config.properties 和环境变量不是动态的，而系统属性本身是动态的。
+MicroProfile Config 的具体实现可以决定 `ConfigSource` 是否可以动态。
 
-=== Cleaning up a ConfigSource
+// === Cleaning up a ConfigSource
+//
+// If a `ConfigSource` implements the `java.lang.AutoCloseable` interface then the `close()` method will be called when the underlying `Config` is being released.
+=== 清理配置源
 
-If a `ConfigSource` implements the `java.lang.AutoCloseable` interface then the `close()` method will be called when the underlying `Config` is being released.
+如果 `ConfigSource` 实现了 `java.lang.AutoCloseable` 接口，则在释放底层 `Config` 时将调用 `close()` 方法。
 
-=== ConfigSource and Mutable Data
+// === ConfigSource and Mutable Data
+//
+// A `Config` instance provides no caching but iterates over all `ConfigSources` for each `getValue(String)` operation.
+// A `ConfigSource` is allowed to cache the underlying values itself.
+=== 配置源和可变数据
 
-A `Config` instance provides no caching but iterates over all `ConfigSources` for each `getValue(String)` operation.
-A `ConfigSource` is allowed to cache the underlying values itself.
-
+`Config` 实例不提供缓存，而是在每个 `getValue(String)` 操作时遍历所有 `ConfigSources`。
+`ConfigSource` 可以自行缓存底层值。

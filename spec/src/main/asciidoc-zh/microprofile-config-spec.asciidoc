@@ -15,7 +15,9 @@
 // limitations under the License.
 //
 
-= Configuration for MicroProfile
+// = Configuration for MicroProfile
+= MicroProfile 的配置
+:encoding: utf-8
 :authors: Mark Struberg, Emily Jiang, John D. Ament, Roberto Cortez, Jan Bernitt
 :email: struberg@apache.org, emijiang@uk.ibm.com, john.d.ament@gmail.com, radcortez@yahoo.com, jaanbernitt@gmail.com
 :version-label!:

@@ -22,68 +22,104 @@
 // Gunnar Morling
 
 [[converters]]
-== Converters
+// == Converters
+== 转换器（Converters）
 
-For providing type-safe configuration we need to convert from the configured Strings into target types.
-This happens by providing ``Converter``s in the `Config`.
+// For providing type-safe configuration we need to convert from the configured Strings into target types.
+// This happens by providing ``Converter``s in the `Config`.
+为了提供类型安全的配置，我们需要将配置的字符串转换为目标类型。这是通过在 `Config` 中提供 ``Converter`` 来实现的。
 
-=== Built-in Converters
+// === Built-in Converters
+=== 内置转换器
 
-The following ``Converter``s are provided by MicroProfile Config by default:
+// The following ``Converter``s are provided by MicroProfile Config by default:
+下面的 ``Converter`` 是 MicroProfile Config 默认提供的：
 
-* `boolean` and `java.lang.Boolean` , values for `true` (case insensitive) "true", "1", "YES", "Y" "ON".
-  Any other value will be interpreted as `false`
-* `byte` and `java.lang.Byte`
-* `short` and `java.lang.Short`
-* `int`, `java.lang.Integer`, and `java.util.OptionalInt`
-* `long`, `java.lang.Long`, and `java.util.OptionalLong`
-* `float` and `java.lang.Float`; a dot '.' is used to separate the fractional digits
-* `double`, `java.lang.Double`, and `java.util.OptionalDouble`; a dot '.' is used to separate the fractional digits
-* `char` and `java.lang.Character`
-* `java.lang.Class` based on the result of `Class.forName`
+// * `boolean` and `java.lang.Boolean` , values for `true` (case insensitive) "true", "1", "YES", "Y" "ON".
+//   Any other value will be interpreted as `false`
+// * `byte` and `java.lang.Byte`
+// * `short` and `java.lang.Short`
+// * `int`, `java.lang.Integer`, and `java.util.OptionalInt`
+// * `long`, `java.lang.Long`, and `java.util.OptionalLong`
+// * `float` and `java.lang.Float`; a dot '.' is used to separate the fractional digits
+// * `double`, `java.lang.Double`, and `java.util.OptionalDouble`; a dot '.' is used to separate the fractional digits
+// * `char` and `java.lang.Character`
+// * `java.lang.Class` based on the result of `Class.forName`
 
-All built-in ``Converter``s have the `@Priority` of `1`.
+* `boolean` 和 `java.lang.Boolean` ，值为 `true`（不区分大小写）的字符串 "true"、"1"、"YES"、"Y"、"ON"。任何其他值都将被解释为 `false`。
+* `byte` 和 `java.lang.Byte`
+* `short` 和 `java.lang.Short`
+* `int`、`java.lang.Integer` 和 `java.util.OptionalInt`
+* `long`、`java.lang.Long` 和 `java.util.OptionalLong`
+* `float` 和 `java.lang.Float`；点 '.' 用于分隔小数位
+* `double`、`java.lang.Double` 和 `java.util.OptionalDouble`；点 '.' 用于分隔小数位
+* `char` 和 `java.lang.Character`
+* `java.lang.Class`，基于 `Class.forName` 的结果
 
-The converters for these types must throw an NPE if given a null value to convert.
+// All built-in ``Converter``s have the `@Priority` of `1`.
+所有内置的 ``Converter`` 都具有 `@Priority` 为 `1` 的注解。
 
-=== Adding custom Converters
+// The converters for these types must throw an NPE if given a null value to convert.
+转换器必须在给定要转换的 null 值时抛出 NPE(NullPointException) 异常。
 
-A custom `Converter` must implement the generic interface `org.eclipse.microprofile.config.spi.Converter` and conform to
-the API requirements of that interface.
-The Type parameter of the interface is the target type the String is converted to. If your converter targets a wrapper of a primitive type (e.g. `java.lang.Integer`), the converter applies to both the wrapper type and the primitive type (e.g. `int`)
-You have to register your implementation in a file `/META-INF/services/org.eclipse.microprofile.config.spi.Converter` with the fully qualified class name of the custom implementation.
+// === Adding custom Converters
+=== 添加自定义转换器
 
-A custom `Converter` can define a priority with the `@jakarta.annotation.Priority` annotation.
-If a Priority annotation isn't applied, a default priority of 100 is assumed.
-The `Config` will use the `Converter` with the highest `Priority` for each target type.
+// A custom `Converter` must implement the generic interface `org.eclipse.microprofile.config.spi.Converter` and conform to
+// the API requirements of that interface.
+// The Type parameter of the interface is the target type the String is converted to. If your converter targets a wrapper of a primitive type (e.g. `java.lang.Integer`), the converter applies to both the wrapper type and the primitive type (e.g. `int`)
+// You have to register your implementation in a file `/META-INF/services/org.eclipse.microprofile.config.spi.Converter` with the fully qualified class name of the custom implementation.
+自定义的 `Converter` 必须实现泛型接口 `org.eclipse.microprofile.config.spi.Converter` 并确保符合该接口的 API 要求。
+接口的类型参数是将字符串转换为的目标类型。如果你的转换器针对原始类型的包装器（例如 `java.lang.Integer`），那么转换器同时适用于包装器类型和原始类型（例如 `int`）。
+你必须使用自定义实现的完全限定类名在文件 `/META-INF/services/org.eclipse.microprofile.config.spi.Converter` 中注册你的实现。
 
-A custom `Converter` for a target type of any of the built-in Converters will overwrite the default Converter.
+// A custom `Converter` can define a priority with the `@jakarta.annotation.Priority` annotation.
+// If a Priority annotation isn't applied, a default priority of 100 is assumed.
+// The `Config` will use the `Converter` with the highest `Priority` for each target type.
+自定义的 `Converter` 可以使用 `@jakarta.annotation.Priority` 注解定义优先级。
+如果没有应用优先级注解，则假定默认优先级为 100。
+`Config` 将使用每个目标类型的优先级最高的 `Converter`。
 
-Converters can be added to the `ConfigBuilder` programmatically via `ConfigBuilder#withConverters(Converter<?>... converters)`
-where the type of the converters can be obtained via reflection. However, this is not possible for a lambda converter.
-In this case, use the method `ConfigBuilder#withConverter(Class<T> type, int priority, Converter<T> converter)`.
+// A custom `Converter` for a target type of any of the built-in Converters will overwrite the default Converter.
+自定义的 `Converter` 会覆盖内置转换器的目标类型。
 
-=== Array Converters
+// Converters can be added to the `ConfigBuilder` programmatically via `ConfigBuilder#withConverters(Converter<?>... converters)`
+// where the type of the converters can be obtained via reflection. However, this is not possible for a lambda converter.
+// In this case, use the method `ConfigBuilder#withConverter(Class<T> type, int priority, Converter<T> converter)`.
+转换器可以通过 `ConfigBuilder#withConverters(Converter<?>... converters)` 在 `ConfigBuilder` 中以编程方式添加，其中转换器的类型可以通过反射获取。
+但这对于 lambda 转换器是不可能的。在这种情况下，请使用方法 `ConfigBuilder#withConverter(Class<T> type, int priority, Converter<T> converter)`。
 
-For the built-in converters and custom converters, the corresponding Array converters are provided by default.
-The delimiter for the config value is ",".
-The escape character is "\".
-e.g. With this config `myPets=dog,cat,dog\,cat`, the values as an array will be `{"dog", "cat", "dog,cat"}`.
+// === Array Converters
+=== 数组转换器
 
-==== Programmatic lookup
+// For the built-in converters and custom converters, the corresponding Array converters are provided by default.
+// The delimiter for the config value is ",".
+// The escape character is "\".
+// e.g. With this config `myPets=dog,cat,dog\,cat`, the values as an array will be `{"dog", "cat", "dog,cat"}`.
+对于内置转换器和自定义转换器，默认情况下都提供了相应的数组转换器。
+配置值的分隔符为 ","。
+转义字符为 "\"。
+例如，使用此配置 `myPets=dog,cat,dog\,cat`，数组的值将为 `{"dog", "cat", "dog,cat"}`。
 
-Array as a class type is supported in the programmatic lookup.
+// ==== Programmatic lookup
+==== 编程方式查找
+
+// Array as a class type is supported in the programmatic lookup.
+支持数组作为类类型进行编程方式查找。
 
 [source, java]
 ----
  String[] myPets = config.getValue("myPets", String[].class);
 ----
 
-myPets will be "dog", "cat", "dog,cat" as an array
+// myPets will be "dog", "cat", "dog,cat" as an array
+myPets 是 "dog","cat",dog,cat 的数组。
 
-==== Injection model
+// ==== Injection model
+==== 注入模型
 
-For the property injection, Array, List and Set are supported.
+// For the property injection, Array, List and Set are supported.
+支持对数组、List 和 Set 进行属性注入。
 
 [source, java]
 ----
@@ -92,19 +128,28 @@ For the property injection, Array, List and Set are supported.
 @Inject @ConfigProperty(name="myPets") Set<String> myPetsSet;
 ----
 
-myPets will be "dog", "cat", "dog,cat" as an array, List or Set.
+// myPets will be "dog", "cat", "dog,cat" as an array, List or Set.
+myPets 是 "dog","cat",dog,cat 的数组、List 或 Set。
 
-=== Automatic Converters
-If no built-in nor custom `Converter` exists for a requested Type `T`, an implicit `Converter` is automatically provided if the following conditions are met:
+// === Automatic Converters
+=== 自动转换器
+// If no built-in nor custom `Converter` exists for a requested Type `T`, an implicit `Converter` is automatically provided if the following conditions are met:
+如果没有内置的或自定义的 `Converter` 适用于所请求的类型 `T`，则如果满足以下条件，则会自动提供隐式 `Converter`：
 
-* The target type `T` has a `public static T of(String)` method, or
-* The target type `T` has a `public static T valueOf(String)` method, or
-* The target type `T` has a `public static T parse(CharSequence)` method, or
-* The target type `T` has a public Constructor with a `String` parameter
+// * The target type `T` has a `public static T of(String)` method, or
+// * The target type `T` has a `public static T valueOf(String)` method, or
+// * The target type `T` has a `public static T parse(CharSequence)` method, or
+// * The target type `T` has a public Constructor with a `String` parameter
+* 目标类型 `T` 具有 `public static T of(String)` 方法，或
+* 目标类型 `T` 具有 `public static T valueOf(String)` 方法，或
+* 目标类型 `T` 具有 `public static T parse(CharSequence)` 方法，或
+* 目标类型 `T` 具有一个 `String` 参数的公共构造函数
 
-If a converter returns `null` for a given config value, the property will be treated as being deleted. If it is a required property, `NoSuchElementException` will be thrown. Even if `defaultValue` is specified on the property injection, the `defaultValue` will not be used.
+// If a converter returns `null` for a given config value, the property will be treated as being deleted. If it is a required property, `NoSuchElementException` will be thrown. Even if `defaultValue` is specified on the property injection, the `defaultValue` will not be used.
+如果转换器对给定的配置值返回 `null`，则该属性将被视为已删除。如果它是必需的属性，则会抛出 `NoSuchElementException` 异常。即使在属性注入上指定了 `defaultValue`，也不会使用 `defaultValue`。
 
-=== Cleaning up a Converter
+// === Cleaning up a Converter
+=== 清理转换器
 
-If a `Converter` implements the `java.lang.AutoCloseable` interface  then the `close()` method will be called when the underlying `Config` is being released.
-
+// If a `Converter` implements the `java.lang.AutoCloseable` interface  then the `close()` method will be called when the underlying `Config` is being released.
+如果一个转换器实现了 `java.lang.AutoCloseable` 接口，那么当底层的 `Config` 被释放时，将调用 `close()` 方法。

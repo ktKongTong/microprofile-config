@@ -19,29 +19,38 @@
 // Roberto Cortez
 
 [[property-expressions]]
-== Property Expressions
+// == Property Expressions
+== 属性表达式
 
-The value of a configuration property may contain an expression corresponding to another configuration property. An
-expression string is a mix of plain strings and expression segments, which are wrapped by the sequence `${ ... }`.
+// The value of a configuration property may contain an expression corresponding to another configuration property. An
+// expression string is a mix of plain strings and expression segments, which are wrapped by the sequence `${ ... }`.
+配置属性的值可以包含对应另一个配置属性的表达式。表达式字符串是纯字符串和表达式段的混合，这些表达式段由序列 `${ ... }` 包装。
 
-Consider the following configuration properties file:
-
+// Consider the following configuration properties file:
+比如以下配置属性文件：
 [source,properties]
 ----
 server.url=http://${server.host}/endpoint
 server.host=example.org
 ----
 
-When looking up the `server.url` property, the value will be resolved and expanded to `http://example.org/endpoint`.
-All MicroProfile Config rules still apply. The `Config` is able to resolve expressions from different ConfigSources.
+// When looking up the `server.url` property, the value will be resolved and expanded to `http://example.org/endpoint`.
+// All MicroProfile Config rules still apply. The `Config` is able to resolve expressions from different ConfigSources.
+当查找 `server.url` 属性时，该值将被解析并求值，结果 `http://example.org/endpoint` 。
+所有的 MicroProfile Config 规则仍然适用。`Config` 能够从不同的配置源解析表达式。
 
-Additionally, it is also possible to use the following syntax for property expressions:
+// Additionally, it is also possible to use the following syntax for property expressions:
+另外，属性表达式还可以使用以下语法：
 
-* `${expression:value}` - Provides a default value after the `:` if the expression doesn't find a value.
-* `${my.prop${compose}}` - Composed expressions. Inner expressions are resolved first.
-* `${my.prop}${my.prop}` - Multiple expressions.
+// * `${expression:value}` - Provides a default value after the `:` if the expression doesn't find a value.
+// * `${my.prop${compose}}` - Composed expressions. Inner expressions are resolved first.
+// * `${my.prop}${my.prop}` - Multiple expressions.
+* `${expression:value}` - 如果表达式找不到值，则在 `:` 后提供默认值。
+* `${my.prop${compose}}` - 组合表达式。先解析内部表达式。
+* `${my.prop}${my.prop}` - 多个表达式。
 
-Consider the following configuration properties file:
+// Consider the following configuration properties file:
+比如以下配置属性文件：
 
 [source,properties]
 ----
@@ -52,27 +61,38 @@ server.endpoint.path.foo=foo
 server.endpoint.path.bar=foo
 ----
 
-The property `server.url` is expanded to `http://example.org:8080/foo`.
+// The property `server.url` is expanded to `http://example.org:8080/foo`.
+`server.url` 属性解析求值为 `http://example.org:8080/foo` 。
 
-If an expression cannot be expanded and does not have a default value, a `NoSuchElementException` is thrown. In the
-Optional case, an empty Optional will be returned. In the `ConfigValue` case, an `ConfigValue` with only
-the name of the property will be returned.
+// If an expression cannot be expanded and does not have a default value, a `NoSuchElementException` is thrown. In the
+// Optional case, an empty Optional will be returned. In the `ConfigValue` case, an `ConfigValue` with only
+// the name of the property will be returned.
+如果无法求表达式的值并且没有默认值，则会抛出 `NoSuchElementException` 异常。
+在 Optional 的情况下，将返回一个空的 Optional。
+在 `ConfigValue` 的情况下，将返回一个仅包含属性名称的 `ConfigValue`。
 
-The number of recursion lookups is not infinite, but a limited number for composed expressions. Implementations are
-encouraged to limit the number to `5`, but they can use higher limits if they wish to. When the number of allowed
-lookups exceeds the limit, an `IllegalArgumentException` is thrown.
+// The number of recursion lookups is not infinite, but a limited number for composed expressions. Implementations are
+// encouraged to limit the number to `5`, but they can use higher limits if they wish to. When the number of allowed
+// lookups exceeds the limit, an `IllegalArgumentException` is thrown.
+递归查找的次数不是无限的，而是有限的次数用于组合表达式。建议实现将次数限制为 `5`，但如果它们愿意，也可以使用更高的限制。
+当允许的查找次数超过限制时，将抛出 `IllegalArgumentException` 异常。
 
-Property expressions applies to all the methods in `Config` that performs resolution of a configuration property,
-including `getValue`, `getValues`, `getConfigValue`, `getValues`, `getOptionalValue`, `getOptionalValues`
-and `getConfigProperties`. The methods `getValue` and `getProperties` in `ConfigSource`, may support property
-expressions as well, but it is not required by the specification.
+// Property expressions applies to all the methods in `Config` that performs resolution of a configuration property,
+// including `getValue`, `getValues`, `getConfigValue`, `getValues`, `getOptionalValue`, `getOptionalValues`
+// and `getConfigProperties`. The methods `getValue` and `getProperties` in `ConfigSource`, may support property
+// expressions as well, but it is not required by the specification.
+属性表达式适用于 `Config` 中执行所有配置属性解析的所有方法，包括 `getValue`、`getValues`、`getConfigValue`、`getValues`、`getOptionalValue` 、`getOptionalValues` 和 `getConfigProperties`。
+`ConfigSource` 中的 `getValue` 和 `getProperties` 方法也可以支持属性表达式，但规范没有要求这样做。
 
-Property expressions must also be applied to configuration properties injected via CDI. A default value
-defined via `org.eclipse.microprofile.config.inject.ConfigProperty#defaultValue` is not eligible to be expanded since
-multiple candidates may be available.
+// Property expressions must also be applied to configuration properties injected via CDI. A default value
+// defined via `org.eclipse.microprofile.config.inject.ConfigProperty#defaultValue` is not eligible to be expanded since
+// multiple candidates may be available.
+属性表达式也必须应用于通过 CDI 注入的配置属性。
+通过 `org.eclipse.microprofile.config.inject.ConfigProperty#defaultValue` 定义的默认值不符合解析求值条件，因为可能有多个候选值可用。
 
-If a configuration property value or default value requires the raw value without expansion, the expression may be
-escaped with a backslash ("\", double "\\" for property file-based sources). For instance:
+// If a configuration property value or default value requires the raw value without expansion, the expression may be
+// escaped with a backslash ("\", double "\\" for property file-based sources). For instance:
+如果一个配置属性值或默认值需要原始值而不是解析计算的值，则可以使用反斜杠（“\”，双反斜杠（“\\”）用于基于属性文件的源）对表达式进行转义。
 
 [source,properties]
 ----
@@ -80,19 +100,29 @@ server.url=\\${server.host}
 server.host=localhost
 ----
 
-The value of `server.url` is `${server.host}`.
+// The value of `server.url` is `${server.host}`.
+`server.url` 的值为 `${server.host}` 。
 
-=== Backwards Compatibility
+// === Backwards Compatibility
+=== 向后兼容性
 
-MicroProfile Config implementations MUST provide a way to disable variable evaluation to provide backwards
-compatibility. The property `mp.config.property.expressions.enabled` was introduced for this purpose. The value of the
-property determines whether the property expression is enabled or disabled. The value `false` means the property
-expression is disabled, while `true` means enabled.
+// MicroProfile Config implementations MUST provide a way to disable variable evaluation to provide backwards
+// compatibility. The property `mp.config.property.expressions.enabled` was introduced for this purpose. The value of the
+// property determines whether the property expression is enabled or disabled. The value `false` means the property
+// expression is disabled, while `true` means enabled.
+为了向后兼容，MicroProfile Config 实现**必须**提供一种方法来禁用变量求值。
+为此引入了 `mp.config.property.expressions.enabled` 属性。
+该属性的值决定是否启用属性表达式。
+值 `false` 表示属性表达式被禁用，而 `true` 表示启用。
 
-If property expression expansion is not desirable for a specific case, the raw value on a configuration property may be
-retrieved by calling `getRawValue()` in `ConfigValue`.
+// If property expression expansion is not desirable for a specific case, the raw value on a configuration property may be
+// retrieved by calling `getRawValue()` in `ConfigValue`.
+如果对于某个特定的情况，不希望进行属性表达式的解析求值，则可以通过在 `ConfigValue` 中调用 `getRawValue()` 来获取配置属性的原始值。
 
-Specific sources may already use a similar or identical syntax to the one described in this specification. To preserve
-this usage, `ConfigSource#getValue()` should perform the expression substitution and then return the resolved value.
-Should such a source return a value with an expression from `ConfigSource#getValue()`, usual expression substitution
-does occur as described by this spec.
+// Specific sources may already use a similar or identical syntax to the one described in this specification. To preserve
+// this usage, `ConfigSource#getValue()` should perform the expression substitution and then return the resolved value.
+// Should such a source return a value with an expression from `ConfigSource#getValue()`, usual expression substitution
+// does occur as described by this spec.
+特定的源可能已经使用与本规范中描述的类似或相同的语法。
+为了保留此用法，`ConfigSource#getValue()` 应执行表达式替换，然后返回解析后的值。
+如果这样的源返回一个带有 `ConfigSource#getValue()` 的表达式的值，就会发生本规范所描述的常规表达式替换。
